@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sas-compute-sidecar-configmap
+data:
+  sidecar.py: |
+    import json
+    import boto3
+    import os
+
+    os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
+    os.environ['LAMBDA_FUNCTION_NAME'] = 'JITdemoFunction'
+
+    def invoke_lambda(jwt_token, ldap_id, project):
+        lambda_function_name = os.getenv("LAMBDA_FUNCTION_NAME")
+        print(f"Lambda Function Name: {lambda_function_name}")  # Add this line for debugging
+        client = boto3.client("lambda")
+
+        payload = {
+            "jwt": jwt_token,
+            "username": ldap_id,
+            "project": project
+        }
+
+        response = client.invoke(
+            FunctionName=lambda_function_name,
+            InvocationType="RequestResponse",
+            Payload=json.dumps(payload)
+        )
+
+        response_payload = json.loads(response["Payload"].read())
+        credentials = json.loads(response_payload["body"])
+
+        return credentials
+
+    def main():
+        username = os.getenv("USERNAME")
+        project = os.getenv("PROJECT")
+        jwt_token = os.getenv("JWT_TOKEN")
+
+        print(f"Username: {username}, Project: {project}, JWT Token: {jwt_token}")  # Add this line for debugging
+
+        credentials = invoke_lambda(jwt_token, username, project)
+
+        print(f"Credentials: {credentials}")  # Add this line for debugging
+
+        aws_credentials_path = "/etc/.aws"
+        os.makedirs(aws_credentials_path, exist_ok=True)
+
+        # Writing credentials file
+        with open(f"{aws_credentials_path}/credentials", "w") as f:
+            f.write(f"[default]\n")
+            f.write(f"aws_access_key_id={credentials['AccessKeyId']}\n")
+            f.write(f"aws_secret_access_key={credentials['SecretAccessKey']}\n")
+            if 'SessionToken' in credentials and credentials['SessionToken']:
+                f.write(f"aws_session_token={credentials['SessionToken']}\n")
+
+        # Writing config file
+        with open(f"{aws_credentials_path}/config", "w") as f:
+            f.write(f"[default]\n")
+            f.write(f"region=us-east-1\n")
+
+    if __name__ == "__main__":
+        main()
