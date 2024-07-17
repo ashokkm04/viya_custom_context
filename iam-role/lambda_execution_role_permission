@@ -1,0 +1,16 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+                "arn:aws:secretsmanager:us-east-1:<aws_account_id:secret:hr_secret-jaaSAI",
+                "arn:aws:secretsmanager:us-east-1:<aws_account_id:secret:marketing_secret-TgV5qz",
+                "arn:aws:secretsmanager:us-east-1:<aws_account_id>:secret:sales_secret-RxJc8j"
+            ]
+        }
+    ]
+}
