@@ -17,6 +17,8 @@ The ConfigMap is structured to perform the following steps:
 1. Lambda Invocation:
 
 From the sidecar container, the Lambda function is invoked using the username, JWT token, and project name.
+
+
 2. Process Response JSON:
 
 The response.json from the Lambda invocation is processed. The AWS credentials are then written to a credentials file located in the /etc/.aws shared mount volume with compute. This setup enables the corresponding project user to access the S3 bucket.
