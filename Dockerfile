@@ -1,0 +1,7 @@
+## This is the Dockerfile for the python image this just builds a layer with boto3 
+
+FROM python:3.9-slim
+WORKDIR /app
+RUN pip install boto3
+COPY . /app
+CMD ["python3"]
