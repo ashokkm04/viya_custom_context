@@ -24,7 +24,7 @@
   path: /template/spec/containers/-
   value:
     name: sas-compute-sidecar
-    image: ashokm7/python:2.0                                 ##Python image with boto3 pre built##
+    image: ashokm7/python:2.0                                 ##Python image with boto3 pre built## Dockerfile for the image added to the project its just a python slim with boto3 layer added on top
     imagePullPolicy: IfNotPresent
     env:
       - name: JWT_TOKEN
