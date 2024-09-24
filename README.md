@@ -1,3 +1,7 @@
+![Viya with custom compute context](./fanniemae_arch.png)
+
+
+
 Lambda Function
 Receive and Parse the Incoming Event:
 
@@ -44,8 +48,6 @@ Ensure you have the following:
 
 AWS CLI installed and configured with appropriate access rights.
 Necessary IAM permissions to create resources.
-
-![Viya with custom compute context](./fanniemae_arch.png)
 
 
 ## Steps to Create AWS Resources
@@ -192,4 +194,4 @@ At this point configuration is completed you should be able to initiate a comput
 Also you can exec into compute pods and validate the aws creds for their project were downloaded into path /etc/.aws/credentials (shared mount volume) 
 
 
-
+![Credentials downloaded for the project by invoking lambda](./creds_from_lambda.png)
