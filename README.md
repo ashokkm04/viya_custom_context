@@ -45,6 +45,9 @@ Ensure you have the following:
 AWS CLI installed and configured with appropriate access rights.
 Necessary IAM permissions to create resources.
 
+![Viya with custom compute context](./fanniemae.png)
+
+
 ## Steps to Create AWS Resources
 ```bash
 
