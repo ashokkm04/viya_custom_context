@@ -192,6 +192,6 @@ verify the podtemplates having all our changes in place.
 At this point configuration is completed you should be able to initiate a compute session for each user group user with proc execution to list s3 buckets. You would be able to list buckets based on the compute sessions corresponding to projects/users.   
 
 Also you can exec into compute pods and validate the aws creds for their project were downloaded into path /etc/.aws/credentials (shared mount volume) 
-
+```
 ##Credentials downloaded for the project by invoking lambda
 ![Credentials downloaded for the project by invoking lambda](./creds_from_lambda.png)
