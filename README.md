@@ -193,5 +193,5 @@ At this point configuration is completed you should be able to initiate a comput
 
 Also you can exec into compute pods and validate the aws creds for their project were downloaded into path /etc/.aws/credentials (shared mount volume) 
 
-
+##Credentials downloaded for the project by invoking lambda
 ![Credentials downloaded for the project by invoking lambda](./creds_from_lambda.png)
