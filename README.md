@@ -32,3 +32,46 @@ A specific policy (lambda_execution_role_permission) allows the Lambda function 
 Service Account Role Policy:
 
 This policy (service_account_role) provides the role necessary to invoke the Lambda function from the EKS cluster, which is enabled with IRSA/OIDC. The associated assume role policy is also defined.
+
+
+
+
+This project contains the implementation code for setting up SAS Viya custom context. Below are the instructions for creating the necessary AWS resources using AWS CLI commands.
+
+
+Prerequisites
+Ensure you have the following:
+
+AWS CLI installed and configured with appropriate access rights.
+Necessary IAM permissions to create resources.
+
+## Steps to Create AWS Resources
+
+### 1. S3 Bucket
+Create an S3 bucket to store Viya-related data.
+
+```bash
+aws s3 mb s3://<your-bucket-name>
+
+###2. IAM Role
+Create an IAM role with permissions for Viya services.
+
+aws iam create-role --role-name <your-role-name> \
+  --assume-role-policy-document file://trust-policy.json
+
+aws iam attach-role-policy --role-name <your-role-name> \
+  --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess
+aws iam attach-role-policy --role-name <your-role-name> \
+  --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess
+
+3. Lambda Function
+Create a Lambda function to handle custom operations.
+zip function.zip index.js
+aws lambda create-function --function-name <your-function-name> \
+  --zip-file fileb://function.zip \
+  --handler index.handler \
+  --runtime nodejs14.x \
+  --role arn:aws:iam::<your-account-id>:role/<your-role-name>
+
+
+
