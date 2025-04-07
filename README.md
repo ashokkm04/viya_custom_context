@@ -1,3 +1,5 @@
+Please refer this for internal documentation on gitlab: https://gitlab.sas.com/ashokm/viya_custom_context
+
 ## SAS Viya Custom Context Integration with AWS Services
 This project demonstrates the integration of SAS Viya with AWS infrastructure by securely injecting AWS credentials into compute pods using a custom Lambda function, Kubernetes ConfigMaps, and IAM policies.
 
