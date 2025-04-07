@@ -2,7 +2,7 @@
 
 
 
-Lambda Function
+## Lambda Function
 Receive and Parse the Incoming Event:
 
 The Lambda function is designed to handle incoming events that include a JWT token, user ID, and project name.
@@ -15,35 +15,42 @@ Using the secret's ARN, the function retrieves the secret AWS key pairs associat
 Process Response:
 
 After retrieving the AWS keys, the response is formatted as response.json.
-ConfigMap Logic
+
+## ConfigMap Logic
 The ConfigMap is structured to perform the following steps:
 
 1. Lambda Invocation:
 
-From the sidecar container, the Lambda function is invoked using the username, JWT token, and project name.
+From the sidecar container attached to compute pod, the Lambda function is invoked using the username, JWT token, and project name. These parameters are obtained from Kubernetes labels. 
+
+
 
 
 2. Process Response JSON:
 
-The response.json from the Lambda invocation is processed. The AWS credentials are then written to a credentials file located in the /etc/.aws shared mount volume with compute. This setup enables the corresponding project user to access the S3 bucket.
+The response.json from the Lambda invocation is processed as required in this block(Logic is in config map). The AWS credentials are then written to a credentials file located in the /etc/.aws shared mount volume with compute. This setup enables the corresponding project user to access the S3 bucket.
+
 Policies and Roles
-Group Policies:
+
+
+## Group Policies:
 
 Group policies for each project can be created using a standard template policy (project_group_policy).
 Lambda Execution Role Policy:
 
-A specific policy (lambda_execution_role_permission) allows the Lambda function to execute and access secrets, along with its associated assume role policy.
+Lambda specific policy (lambda_execution_role_permission) allows the Lambda function to execute and access secrets, along with its associated assume role policy.
+
 Service Account Role Policy:
 
 This policy (service_account_role) provides the role necessary to invoke the Lambda function from the EKS cluster, which is enabled with IRSA/OIDC. The associated assume role policy is also defined.
 
-
-
+Enabling IRSA and linking the SA with above role is the key step for the cluster to get reqired access. ARN of this IAM role should be linked with SA annotation.  https://eksctl.io/usage/iamserviceaccounts/
 
 This project contains the implementation code for setting up SAS Viya custom context. Below are the instructions for creating the necessary AWS resources using AWS CLI commands.
 
 
-Prerequisites
+## Prerequisites
+
 Ensure you have the following:
 
 AWS CLI installed and configured with appropriate access rights.
@@ -193,5 +200,21 @@ At this point configuration is completed you should be able to initiate a comput
 
 Also you can exec into compute pods and validate the aws creds for their project were downloaded into path /etc/.aws/credentials (shared mount volume) 
 ```
-##Credentials downloaded for the project by invoking lambda
+## Credentials downloaded for the project by invoking lambda
 ![Credentials downloaded for the project by invoking lambda](./creds_from_lambda.png)
+
+## Authenctation successful when accessing the bucket for the associated user group (HR compute)
+![successful](./auth_success.png)
+
+## Authenctation rejected when accessing the bucket of another user group (HR compute trying to access sales bucket)
+![Failed](./auth_err.png)
+
+
+
+## Lamda response when invoked manually with payload : Ideally if you change the project name you can see its response with different keys same happens inside the pod.  This response is processed and written to /etc/.aws/credentias which a shared mount between sidecar and compute pod
+![Lambda invoke response](./lambda_invoke_response.png)
+
+## From the aws console you can test with below payload
+![input](./lambda_payload.png)
+![response](./lambda_response.png)
+
