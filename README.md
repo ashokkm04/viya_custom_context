@@ -1,12 +1,13 @@
-SAS Viya Custom Context Integration with AWS Services
+##SAS Viya Custom Context Integration with AWS Services
 This project demonstrates the integration of SAS Viya with AWS infrastructure by securely injecting AWS credentials into compute pods using a custom Lambda function, Kubernetes ConfigMaps, and IAM policies.
 
 
 ![Viya with custom compute context](./fanniemae_arch.png)
 
 
-Overview
-The integration utilizes:
+##Overview
+
+The integration uses the following:
 
 AWS Lambda: To securely fetch AWS credentials from Secrets Manager based on project-specific metadata.
 
@@ -17,7 +18,7 @@ IAM Roles and Policies: For controlled access to Secrets Manager and S3 buckets.
 IRSA (IAM Roles for Service Accounts): To grant Kubernetes service accounts permission to invoke Lambda functions securely.
 
 ## Lambda Function
-Purpose
+##Purpose
 The Lambda function processes incoming events to dynamically retrieve project-specific AWS credentials from AWS Secrets Manager.
 
 Function Workflow
@@ -40,13 +41,13 @@ Return Response
 AWS credentials are returned in JSON format, ready for use inside the compute pod.
 
 
-##Kubernetes ConfigMap Logic##
+##Kubernetes ConfigMap Logic
 The sidecar container in each compute pod performs the following:
 
-Invoke Lambda Function
+##Invoke Lambda Function
 The sidecar uses metadata (username, JWT token, and project name) extracted from pod labels to invoke the Lambda function.
 
-Process Lambda Response
+##Process Lambda Response
 The resulting response.json is parsed, and credentials are written to /etc/.aws/credentials, a shared volume between the sidecar and compute container.
 
 This allows each user session to access only the appropriate S3 bucket for their project.
@@ -57,10 +58,10 @@ This allows each user session to access only the appropriate S3 bucket for their
 
 The response.json from the Lambda invocation is processed as required in this block(Logic is in config map). The AWS credentials are then written to a credentials file located in the /etc/.aws shared mount volume with compute. This setup enables the corresponding project user to access the S3 bucket.
 
-Policies and Roles
+##Policies and Roles
 
 
-## Group Policies:
+Group Policies:
 
 Each project group (HR, Sales, Marketing) is assigned a dedicated IAM group policy (e.g., project_group_policy) that provides access to their respective S3 buckets.Lambda Execution Role Policy:
 
