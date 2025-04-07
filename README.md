@@ -1,28 +1,55 @@
+SAS Viya Custom Context Integration with AWS Services
+This project demonstrates the integration of SAS Viya with AWS infrastructure by securely injecting AWS credentials into compute pods using a custom Lambda function, Kubernetes ConfigMaps, and IAM policies.
+
+
 ![Viya with custom compute context](./fanniemae_arch.png)
 
 
+Overview
+The integration utilizes:
+
+AWS Lambda: To securely fetch AWS credentials from Secrets Manager based on project-specific metadata.
+
+Kubernetes Sidecar Pattern: To enable compute pods to access AWS resources dynamically.
+
+IAM Roles and Policies: For controlled access to Secrets Manager and S3 buckets.
+
+IRSA (IAM Roles for Service Accounts): To grant Kubernetes service accounts permission to invoke Lambda functions securely.
 
 ## Lambda Function
-Receive and Parse the Incoming Event:
+Purpose
+The Lambda function processes incoming events to dynamically retrieve project-specific AWS credentials from AWS Secrets Manager.
 
-The Lambda function is designed to handle incoming events that include a JWT token, user ID, and project name.
-Initialize the AWS Secrets Manager Client:
+Function Workflow
+Event Handling
+The Lambda receives an event payload containing:
 
-The function begins by creating a session and client to interact with AWS Secrets Manager.
-Retrieve Secret from Secrets Manager:
+1)JWT Token
 
-Using the secret's ARN, the function retrieves the secret AWS key pairs associated with the specified project from Secrets Manager.
-Process Response:
+2)User ID
 
-After retrieving the AWS keys, the response is formatted as response.json.
+3)Project Name
 
-## ConfigMap Logic
-The ConfigMap is structured to perform the following steps:
+Initialize AWS Secrets Manager Client
+A client session is established to interact with Secrets Manager.
 
-1. Lambda Invocation:
+Retrieve Secrets
+The function accesses the relevant secret using the secret ARN corresponding to the project.
 
-From the sidecar container attached to compute pod, the Lambda function is invoked using the username, JWT token, and project name. These parameters are obtained from Kubernetes labels. 
+Return Response
+AWS credentials are returned in JSON format, ready for use inside the compute pod.
 
+
+##Kubernetes ConfigMap Logic##
+The sidecar container in each compute pod performs the following:
+
+Invoke Lambda Function
+The sidecar uses metadata (username, JWT token, and project name) extracted from pod labels to invoke the Lambda function.
+
+Process Lambda Response
+The resulting response.json is parsed, and credentials are written to /etc/.aws/credentials, a shared volume between the sidecar and compute container.
+
+This allows each user session to access only the appropriate S3 bucket for their project.
 
 
 
@@ -35,18 +62,16 @@ Policies and Roles
 
 ## Group Policies:
 
-Group policies for each project can be created using a standard template policy (project_group_policy).
-Lambda Execution Role Policy:
+Each project group (HR, Sales, Marketing) is assigned a dedicated IAM group policy (e.g., project_group_policy) that provides access to their respective S3 buckets.Lambda Execution Role Policy:
 
-Lambda specific policy (lambda_execution_role_permission) allows the Lambda function to execute and access secrets, along with its associated assume role policy.
+The Lambda function assumes a role (lambda_execution_role_permission) that permits it to retrieve secrets from AWS Secrets Manager. This role must include a trust relationship allowing lambda.amazonaws.com to assume the role.
 
 Service Account Role Policy:
+The Kubernetes service account assumes a role (e.g., service_account_role) with permission to invoke the Lambda function. IRSA is enabled using OIDC and the IAM role is annotated in the Kubernetes service account.
 
-This policy (service_account_role) provides the role necessary to invoke the Lambda function from the EKS cluster, which is enabled with IRSA/OIDC. The associated assume role policy is also defined.
+Refer to: https://eksctl.io/usage/iamserviceaccounts/
 
-Enabling IRSA and linking the SA with above role is the key step for the cluster to get reqired access. ARN of this IAM role should be linked with SA annotation.  https://eksctl.io/usage/iamserviceaccounts/
-
-This project contains the implementation code for setting up SAS Viya custom context. Below are the instructions for creating the necessary AWS resources using AWS CLI commands.
+Commands used and instructions: 
 
 
 ## Prerequisites
